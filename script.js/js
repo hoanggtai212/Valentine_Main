@@ -1,72 +1,90 @@
-body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:radial-gradient(circle at top,#1d1b3a,#0f0c29);
-    font-family:sans-serif;
-    color:white;
-    overflow:hidden;
+// ===== NHẠC =====
+document.body.addEventListener("click",()=>{
+    document.getElementById("music").play();
+});
+
+// ===== PASS =====
+const password = "0608";
+let input = "";
+
+function addNum(num){
+    if(input.length < 4){
+        input += num;
+        updateDots();
+    }
+
+    if(input.length === 4){
+        if(input === password){
+            window.location.href="home.html";
+        }else{
+            triggerError();
+        }
+    }
 }
 
-canvas{
-    position:fixed;
-    top:0;
-    left:0;
-    z-index:-1;
+function clearPass(){
+    input="";
+    updateDots();
 }
 
-.box{
-    text-align:center;
-    padding:30px;
-    background:rgba(255,255,255,0.05);
-    border-radius:25px;
-    backdrop-filter: blur(15px);
-    transition:0.3s;
+function updateDots(){
+    let dots="";
+    for(let i=0;i<4;i++){
+        dots += i<input.length ? "● " : "○ ";
+    }
+    document.getElementById("dots").innerHTML=dots;
 }
 
-h1{
-    color:#ff9ecf;
+function triggerError(){
+    const box=document.getElementById("box");
+    box.classList.add("error");
+
+    if(navigator.vibrate){
+        navigator.vibrate(200);
+    }
+
+    setTimeout(()=>{
+        box.classList.remove("error");
+        input="";
+        updateDots();
+    },500);
 }
 
-.dots{
-    font-size:30px;
-    letter-spacing:12px;
-    margin:20px 0;
+// ===== HẠT BAY =====
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+for(let i=0;i<60;i++){
+    particles.push({
+        x: Math.random()*canvas.width,
+        y: Math.random()*canvas.height,
+        radius: Math.random()*3+1,
+        speed: Math.random()*1+0.5
+    });
 }
 
-.keypad{
-    display:grid;
-    grid-template-columns:repeat(3,80px);
-    gap:15px;
-    justify-content:center;
+function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    particles.forEach(p=>{
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
+        ctx.fillStyle="rgba(255,150,200,0.8)";
+        ctx.fill();
+
+        p.y -= p.speed;
+        if(p.y<0){
+            p.y=canvas.height;
+            p.x=Math.random()*canvas.width;
+        }
+    });
+
+    requestAnimationFrame(animate);
 }
 
-button{
-    height:60px;
-    font-size:20px;
-    border:none;
-    border-radius:15px;
-    background:#444;
-    color:white;
-    cursor:pointer;
-    transition:0.2s;
-}
-
-button:active{
-    background:#ff4da6;
-}
-
-.error{
-    animation:shake 0.4s;
-}
-
-@keyframes shake{
-    0%{transform:translateX(0);}
-    25%{transform:translateX(-8px);}
-    50%{transform:translateX(8px);}
-    75%{transform:translateX(-8px);}
-    100%{transform:translateX(0);}
-}
-
+animate();
